@@ -11,6 +11,10 @@ HONORIFIC_MAP = {
     'Hon.': 'Q2746176'
 }
 
+PARTY_MAP = {
+    'JP': 'Q27963537'  # Jubilee Party of Kenya
+}
+
 parsedMembers = []
 
 PAGES = 12
@@ -54,7 +58,12 @@ for x in range(0, PAGES):
 
         memberData['district'] = row.cssselect('td')[3].text.strip()
 
-        memberData['party'] = row.cssselect('td')[4].text.strip()
+        partyCode = row.cssselect('td')[4].text.strip()
+
+        if partyCode in PARTY_MAP:
+            memberData['party'] = PARTY_MAP['partyCode']
+        else:
+            memberData['party'] = partyCode
 
         electoralStatus = row.cssselect('td')[5].text.strip()
 
