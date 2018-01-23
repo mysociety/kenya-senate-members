@@ -61,7 +61,7 @@ for x in range(0, PAGES):
         partyCode = row.cssselect('td')[4].text.strip()
 
         if partyCode in PARTY_MAP:
-            memberData['party'] = PARTY_MAP['partyCode']
+            memberData['party'] = PARTY_MAP[partyCode]
         else:
             memberData['party'] = partyCode
 
