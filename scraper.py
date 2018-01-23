@@ -12,7 +12,12 @@ HONORIFIC_MAP = {
 }
 
 PARTY_MAP = {
-    'JP': 'Q27963537'  # Jubilee Party of Kenya
+    'IND': 'Q327591',  # Independent
+    'JP': 'Q27963537',  # Jubilee Party of Kenya
+    'FORD-K': 'Q5473121',  # Forum for the Restoration of Democracy – Kenya
+    'ODM': 'Q1640905',  # Orange Democratic Movement
+    'WDM-K': 'Q5251223',  # Wiper Democratic Movement
+    'KANU': 'Q1422517',  # Kenya African National Union
 }
 
 parsedMembers = []
