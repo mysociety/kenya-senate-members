@@ -1,24 +1,76 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
+# coding=utf-8
 
-# import scraperwiki
-# import lxml.html
-#
-# # Read in a page
-# html = scraperwiki.scrape("http://foo.com")
-#
-# # Find something on the page using css selectors
-# root = lxml.html.fromstring(html)
-# root.cssselect("div[align='left']")
-#
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-# scraperwiki.sql.select("* from data where 'name'='peter'")
+import scraperwiki
+import lxml.html
+import sqlite3
+import re
 
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
+BASE_URL = 'http://www.parliament.go.ke/the-national-assembly/members?start='
+
+HONORIFIC_MAP = {
+    'Hon.': 'Q2746176'
+}
+
+parsedMembers = []
+
+PAGES = 12
+PER_PAGE = 30
+
+for x in range(0, PAGES):
+
+    pageStart = PER_PAGE * x
+
+    scrapeUrl = BASE_URL + str(pageStart)
+
+    print('Scraping from ' + scrapeUrl)
+
+    # Get the page!
+    html = scraperwiki.scrape(scrapeUrl)
+    ssRoot = lxml.html.fromstring(html)
+
+    rows = ssRoot.cssselect('tr')
+
+    # Skip the header row
+    for row in rows[1:]:
+
+        memberData = {}
+
+        nameLink = row.cssselect('a')[0]
+
+        nameUnparsed = nameLink.text.strip()
+
+        linkHref = nameLink.attrib['href']
+
+        idRegex = re.search('\/the-national-assembly\/members\/item\/(.+)', linkHref)
+        memberData['id'] = idRegex.group(1)
+
+        memberData['url'] = 'http://www.parliament.go.ke/the-national-assembly/members/item/' + memberData['id']
+
+        nameRegex = re.search('(.+?) (.+), (.+)', nameUnparsed)
+        memberData['honorific_string'] = nameRegex.group(1)
+        memberData['honorific_id'] = HONORIFIC_MAP[nameRegex.group(1)]
+
+        memberData['name'] = nameRegex.group(3) + ' ' + nameRegex.group(2)
+
+        memberData['district'] = row.cssselect('td')[3].text.strip()
+
+        memberData['party'] = row.cssselect('td')[4].text.strip()
+
+        electoralStatus = row.cssselect('td')[5].text.strip()
+
+        print memberData
+
+        if electoralStatus == 'Elected':
+            parsedMembers.append(memberData)
+        else:
+            print ('Skipping insert, status is ' + electoralStatus)
+
+    print 'Counted {} Members so far...'.format(len(parsedMembers))
+
+try:
+    scraperwiki.sqlite.execute('DELETE FROM data')
+except sqlite3.OperationalError:
+    pass
+scraperwiki.sqlite.save(
+    unique_keys=['id'],
+    data=parsedMembers)
