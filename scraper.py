@@ -413,24 +413,28 @@ for x in range(0, PAGES):
         constituency = row.cssselect('td')[3].text.strip()
         county = row.cssselect('td')[2].text.strip()
 
+        memberData['constituency'] = constituency
+        memberData['county'] = county
+
         # Same constituency and county? Probably a women's rep
         if constituency == county:
             if county in COUNTY_MAP:
-                memberData['district'] = COUNTY_MAP[county]
+                memberData['district_id'] = COUNTY_MAP[county]
             else:
-                memberData['district'] = county
+                memberData['district_id'] = '?'
         else:
             if constituency in CONSTITUENCY_MAP:
-                memberData['district'] = CONSTITUENCY_MAP[constituency]
+                memberData['district_id'] = CONSTITUENCY_MAP[constituency]
             else:
-                memberData['district'] = constituency
+                memberData['district_id'] = '?'
 
         partyCode = row.cssselect('td')[4].text.strip()
 
+        memberData['party'] = partyCode
         if partyCode in PARTY_MAP:
-            memberData['party'] = PARTY_MAP[partyCode]
+            memberData['party_id'] = PARTY_MAP[partyCode]
         else:
-            memberData['party'] = partyCode
+            memberData['party_id'] = '?'
 
         electoralStatus = row.cssselect('td')[5].text.strip()
 
