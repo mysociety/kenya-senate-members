@@ -411,7 +411,7 @@ for x in range(0, PAGES):
         memberData['name'] = nameRegex.group(3) + ' ' + nameRegex.group(2)
 
         constituency = row.cssselect('td')[3].text.strip()
-        county = row.cssselect('td')[3].text.strip()
+        county = row.cssselect('td')[2].text.strip()
 
         # Same constituency and county? Probably a women's rep
         if constituency == county:
