@@ -12,16 +12,27 @@ HONORIFIC_MAP = {
 }
 
 PARTY_MAP = {
-    'IND': 'Q327591',  # Independent
-    'JP': 'Q27963537',  # Jubilee Party of Kenya
-    'FORD-K': 'Q5473121',  # Forum for the Restoration of Democracy – Kenya
-    'ODM': 'Q1640905',  # Orange Democratic Movement
-    'WDM-K': 'Q5251223',  # Wiper Democratic Movement
-    'KANU': 'Q1422517',  # Kenya African National Union
-    'ANC': 'Q47489380',  # Amani National Congress
-    'PDR': 'Q7141057',  # Party of Development and Reforms
-    'EFP': 'Q42954840',  # Economic Freedom Party
-    'MCCP': 'Q47489396',  # Maendeleo Chap Chap Party
+    'ANC':      'Q47489380',    # Amani National Congress
+    'CCM':      'Q47492863',    # Chama Cha Mashinani
+    'EFP':      'Q42954840',    # Economic Freedom Party
+    'FAP':      'Q47492871',    # Frontier Alliance Party
+    'FORD-K':   'Q5473121',     # Forum for the Restoration of Democracy – Kenya
+    'IND':      'Q327591',      # Independent
+    'JP':       'Q27963537',    # Jubilee Party of Kenya
+    'KANU':     'Q1422517',     # Kenya African National Union
+    'KPP':      'Q47492848',    # Kenya Patriots Party
+    'MCCP':     'Q47489396',    # Maendeleo Chap Chap Party
+    'NAPK':     'Q47492879',    # National Agenda Party of Kenya
+    'ODM':      'Q1640905',     # Orange Democratic Movement
+    'PDR':      'Q7141057',     # Party of Development and Reforms
+    'PNU':      'Q2559675',     # Party of National Unity
+    'WDM-K':    'Q5251223',     # Wiper Democratic Movement
+    'PDP':      'Q22666200',    # Peoples Democratic Party
+    'CCU':      'Q5069325',     # Chama Cha Uzalendo
+    'KNC':      'Q6392670',     # Kenya National Congress
+    'DP':       'Q3272441',     # Democratic Party
+    'ND':       'Q47490108',    # New Democrats
+    'MUUNGANO': 'Q22666185',    # Muungano Party
 }
 
 # We maintain an internal map of counties and constituencies to WD items.
@@ -66,9 +77,9 @@ COUNTY_MAP = {
     'Nyeri': 'Q749665',
     'Samburu': 'Q2096419',
     'Siaya': 'Q3482913',
-    'Taita–Taveta': 'Q7193788',
+    'Taita Taveta': 'Q7193788',
     'Tana River': 'Q383150',
-    'Tharaka Nithi': 'Q2189432',
+    'Tharaka-Nithi': 'Q2189432',
     'Trans-Nzoia': 'Q1278653',
     'Turkana': 'Q1633078',
     'Uasin Gishu': 'Q1121429',
@@ -326,7 +337,7 @@ CONSTITUENCY_MAP = {
     'Samburu West': 'Q7409120',
     'Shinyalu': 'Q7497839',
     'Sigor': 'Q7513096',
-    'Sigowet–Soin': 'Q39087469',
+    'Sigowet/Soin': 'Q39087469',
     'Sirisia': 'Q7530345',
     'Sotik': 'Q7563993',
     'South Imenti': 'Q7567524',
@@ -370,9 +381,16 @@ CONSTITUENCY_MAP = {
 }
 
 parsedMembers = []
+unreconciledCounties = []
+unreconciledConstituencies = []
+unreconciledParties = []
 
 PAGES = 12
 PER_PAGE = 30
+
+
+def cleanup(string):
+    return string.strip().replace(u'’', '\'')
 
 for x in range(0, PAGES):
 
@@ -380,7 +398,7 @@ for x in range(0, PAGES):
 
     scrapeUrl = BASE_URL + str(pageStart)
 
-    print('Scraping from ' + scrapeUrl)
+    print('(i) Scraping from ' + scrapeUrl)
 
     # Get the page!
     html = scraperwiki.scrape(scrapeUrl)
@@ -397,55 +415,72 @@ for x in range(0, PAGES):
 
         nameUnparsed = nameLink.text.strip()
 
-        linkHref = nameLink.attrib['href']
-
-        idRegex = re.search('\/the-national-assembly\/members\/item\/(.+)', linkHref)
-        memberData['id'] = idRegex.group(1)
-
-        memberData['url'] = 'http://www.parliament.go.ke/the-national-assembly/members/item/' + memberData['id']
-
         nameRegex = re.search('(.+?) (.+), (.+)', nameUnparsed)
         memberData['honorific_string'] = nameRegex.group(1)
         memberData['honorific_id'] = HONORIFIC_MAP[nameRegex.group(1)]
 
-        memberData['name'] = nameRegex.group(3) + ' ' + nameRegex.group(2)
+        memberData['name'] = cleanup(nameRegex.group(3) + ' ' + nameRegex.group(2))
 
-        constituency = row.cssselect('td')[3].text.strip()
-        county = row.cssselect('td')[2].text.strip()
+        print('    ' + memberData['name'])
 
-        memberData['constituency'] = constituency
-        memberData['county'] = county
-
-        # Same constituency and county? Probably a women's rep
-        if constituency == county:
-            if county in COUNTY_MAP:
-                memberData['district_id'] = COUNTY_MAP[county]
-            else:
-                memberData['district_id'] = '?'
-        else:
-            if constituency in CONSTITUENCY_MAP:
-                memberData['district_id'] = CONSTITUENCY_MAP[constituency]
-            else:
-                memberData['district_id'] = '?'
-
-        partyCode = row.cssselect('td')[4].text.strip()
-
-        memberData['party'] = partyCode
-        if partyCode in PARTY_MAP:
-            memberData['party_id'] = PARTY_MAP[partyCode]
-        else:
-            memberData['party_id'] = '?'
-
-        electoralStatus = row.cssselect('td')[5].text.strip()
-
-        print memberData
-
+        electoralStatus = cleanup(row.cssselect('td')[5].text)
         if electoralStatus == 'Elected':
-            parsedMembers.append(memberData)
-        else:
-            print ('Skipping insert, status is ' + electoralStatus)
 
-    print 'Counted {} Members so far...'.format(len(parsedMembers))
+            linkHref = nameLink.attrib['href']
+
+            idRegex = re.search('\/the-national-assembly\/members\/item\/(.+)', linkHref)
+            memberData['id'] = idRegex.group(1)
+
+            memberData['url'] = cleanup('http://www.parliament.go.ke/the-national-assembly/members/item/' + memberData['id'])
+
+            county = cleanup(row.cssselect('td')[2].text)
+            constituency = cleanup(row.cssselect('td')[3].text)
+
+            memberData['county'] = county
+            memberData['constituency'] = constituency
+
+            # Same constituency and county? Probably a women's rep
+            if constituency == county:
+                if county in COUNTY_MAP:
+                    memberData['district_id'] = COUNTY_MAP[county]
+                else:
+                    memberData['district_id'] = '?'
+                    unreconciledCounties.append(county)
+                    print('      > Unreconciled county: ' + county)
+            else:
+                if constituency in CONSTITUENCY_MAP:
+                    memberData['district_id'] = CONSTITUENCY_MAP[constituency]
+                else:
+                    memberData['district_id'] = '?'
+                    unreconciledConstituencies.append(county)
+                    print('      > Unreconciled constituency: {}'.format(constituency, county))
+
+            partyCode = cleanup(row.cssselect('td')[4].text)
+
+            memberData['party'] = partyCode
+            if partyCode in PARTY_MAP:
+                memberData['party_id'] = PARTY_MAP[partyCode]
+            else:
+                memberData['party_id'] = '?'
+                unreconciledParties.append(partyCode)
+
+            electoralStatus = row.cssselect('td')[5].text.strip()
+
+            parsedMembers.append(memberData)
+
+        else:
+            print ('      > Skipping, status is ' + electoralStatus)
+
+    print '(i) Counted {} Members so far...'.format(len(parsedMembers))
+
+print('(i) Done.')
+print '(i) Counted {} Members in total'.format(len(parsedMembers))
+print '<!> {} unreconciled counties:'.format(len(unreconciledCounties))
+print unreconciledCounties
+print '<!> {} unreconciled constituencies:'.format(len(unreconciledConstituencies))
+print unreconciledConstituencies
+print '<!> {} unreconciled parties:'.format(len(unreconciledParties))
+print unreconciledParties
 
 try:
     scraperwiki.sqlite.execute('DELETE FROM data')
