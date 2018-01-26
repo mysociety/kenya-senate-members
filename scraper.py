@@ -423,15 +423,28 @@ for x in range(0, PAGES):
 
         print('    ' + memberData['name'])
 
+        linkHref = nameLink.attrib['href']
+
+        idRegex = re.search('\/the-national-assembly\/members\/item\/(.+)', linkHref)
+        memberData['id'] = idRegex.group(1)
+
+        memberData['url'] = cleanup('http://www.parliament.go.ke/the-national-assembly/members/item/' + memberData['id'])
+
+        partyCode = cleanup(row.cssselect('td')[4].text)
+
+        memberData['party'] = partyCode
+        if partyCode in PARTY_MAP:
+            memberData['party_id'] = PARTY_MAP[partyCode]
+        else:
+            memberData['party_id'] = '?'
+            unreconciledParties.append(partyCode)
+
         electoralStatus = cleanup(row.cssselect('td')[5].text)
+
         if electoralStatus == 'Elected':
 
-            linkHref = nameLink.attrib['href']
-
-            idRegex = re.search('\/the-national-assembly\/members\/item\/(.+)', linkHref)
-            memberData['id'] = idRegex.group(1)
-
-            memberData['url'] = cleanup('http://www.parliament.go.ke/the-national-assembly/members/item/' + memberData['id'])
+            # We only need to account for location if the person is elected.
+            # Nominees don't have these things, but are still members.
 
             county = cleanup(row.cssselect('td')[2].text)
             constituency = cleanup(row.cssselect('td')[3].text)
@@ -441,6 +454,9 @@ for x in range(0, PAGES):
 
             # Same constituency and county? Probably a women's rep
             if constituency == county:
+
+                memberData['role'] = 'Q47484213'
+
                 if county in COUNTY_MAP:
                     memberData['district_id'] = COUNTY_MAP[county]
                 else:
@@ -455,21 +471,8 @@ for x in range(0, PAGES):
                     unreconciledConstituencies.append(county)
                     print('      > Unreconciled constituency: {}'.format(constituency, county))
 
-            partyCode = cleanup(row.cssselect('td')[4].text)
+        parsedMembers.append(memberData)
 
-            memberData['party'] = partyCode
-            if partyCode in PARTY_MAP:
-                memberData['party_id'] = PARTY_MAP[partyCode]
-            else:
-                memberData['party_id'] = '?'
-                unreconciledParties.append(partyCode)
-
-            electoralStatus = row.cssselect('td')[5].text.strip()
-
-            parsedMembers.append(memberData)
-
-        else:
-            print ('      > Skipping, status is ' + electoralStatus)
 
     print '(i) Counted {} Members so far...'.format(len(parsedMembers))
 
