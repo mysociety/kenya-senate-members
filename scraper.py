@@ -271,7 +271,7 @@ CONSTITUENCY_MAP = {
     'Mandera South': 'Q47462269',
     'Mandera West': 'Q6747986',
     'Manyatta': 'Q6753394',
-    'Maragua': 'Q6754641',
+    'Maragwa': 'Q6754641',
     'Marakwet East': 'Q6754698',
     'Marakwet West': 'Q6754691',
     'Masinga': 'Q6783288',
