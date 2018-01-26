@@ -93,7 +93,7 @@ COUNTY_MAP = {
 CONSTITUENCY_MAP = {
     'Webuye East': 'Q47463465',
     'Kilgoris': 'Q6406874',
-    'Kisumu Town East': 'Q6417349',
+    'Kisumu East': 'Q6417349',
     'Kamukunji': 'Q6359828',
     'Kapenguria': 'Q13640987',
     'Kanduyi': 'Q6361679',
@@ -104,7 +104,7 @@ CONSTITUENCY_MAP = {
     'Cherangany': 'Q5091828',
     'Starehe': 'Q7601801',
     'Seme': 'Q47463473',
-    'Kisumu Town West': 'Q6417350',
+    'Kisumu West': 'Q6417350',
     'Changamwe': 'Q5071716',
     'Hamisi': 'Q5645412',
     'Tongaren': 'Q47463467',
