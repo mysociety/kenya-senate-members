@@ -382,6 +382,17 @@ CONSTITUENCY_MAP = {
     'Yatta': 'Q8050290',
 }
 
+# Sometimes an MP will be in a constituency with the same name as a county.
+# This is what we use as an indicator of Women Reps, *unless* the MP is listed here.
+OVERRIDE_MPS = [
+    'Aisha Jumwa Karisa Katana',
+    'Daniel Kitonga Maanzo',
+    'Ernest Ogesi Kivai',
+    'Jones Mwagogo Mlolwa',
+    'Jude L. Kangethe Njomo',
+    'Martin Deric Ngunjiri Wambugu',
+]
+
 parsedMembers = []
 unreconciledCounties = []
 unreconciledConstituencies = []
@@ -465,7 +476,9 @@ for x in range(0, PAGES):
             memberData['constituency'] = constituency
 
             # Same constituency and county? Probably a women's rep
-            if constituency == county:
+            if constituency == county and memberData['name'] not in OVERRIDE_MPS:
+
+                print('      > Women\'s Representative')
 
                 memberData['role'] = 'Q47484213'
 
