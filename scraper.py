@@ -12,11 +12,13 @@ HONORIFIC_MAP = {
 }
 
 PARTY_MAP = {
+    'N/A':      '',             # N/A
     'ANC':      'Q47489380',    # Amani National Congress
     'CCM':      'Q47492863',    # Chama Cha Mashinani
     'EFP':      'Q42954840',    # Economic Freedom Party
     'FAP':      'Q47492871',    # Frontier Alliance Party
     'FORD-K':   'Q5473121',     # Forum for the Restoration of Democracy – Kenya
+    'FORD - K': 'Q5473121',     # Forum for the Restoration of Democracy – Kenya
     'IND':      'Q327591',      # Independent
     'JP':       'Q27963537',    # Jubilee Party of Kenya
     'KANU':     'Q1422517',     # Kenya African National Union
@@ -43,7 +45,7 @@ COUNTY_MAP = {
     'Bomet': 'Q891952',
     'Bungoma': 'Q2928204',
     'Busia': 'Q1017519',
-    'Elgeyo/Marakwet': 'Q15216433',
+    'Elgeyo Marakwet': 'Q15216433',
     'Embu': 'Q1335242',
     'Garissa': 'Q1494292',
     'Homa Bay': 'Q1625834',
@@ -248,14 +250,14 @@ CONSTITUENCY_MAP = {
     'Laisamis': 'Q6474135',
     'Lamu East': 'Q6482731',
     'Lamu West': 'Q6482735',
-    'Langata': 'Q6485732',
+    'Lang\'ata': 'Q6485732',
     'Lari': 'Q6489334',
     'Likoni': 'Q6547331',
     'Likuyani': 'Q47463458',
     'Limuru': 'Q10978796',
     'Loima': 'Q47463429',
     'Lugari': 'Q6699735',
-    'Lunga Lunga': 'Q47463406',
+    'Lungalunga': 'Q47463406',
     'Lurambi': 'Q6704894',
     'Maara': 'Q47463416',
     'Machakos Town': 'Q13123147',
@@ -390,7 +392,17 @@ PER_PAGE = 30
 
 
 def cleanup(string):
-    return string.strip().replace(u'’', '\'')
+
+    # Strip any annoying whitespace
+    string = string.strip()
+
+    # Lose any curled apostrophies
+    string = string.replace(u'’', '\'')
+
+    # Fix the Curious Case of Elgeyo/Marakwet so county and constituency match
+    string = string.replace('Elgeyo/Marakwet', 'Elgeyo Marakwet')
+
+    return string
 
 for x in range(0, PAGES):
 
@@ -468,7 +480,7 @@ for x in range(0, PAGES):
                     memberData['district_id'] = CONSTITUENCY_MAP[constituency]
                 else:
                     memberData['district_id'] = 'County: "{}", Constituency: "{}"'.format(county, constituency)
-                    unreconciledConstituencies.append(county)
+                    unreconciledConstituencies.append(constituency)
                     print('      > Unreconciled constituency: {}'.format(constituency, county))
 
         parsedMembers.append(memberData)
