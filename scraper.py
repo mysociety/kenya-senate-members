@@ -436,7 +436,7 @@ for x in range(0, PAGES):
         if partyCode in PARTY_MAP:
             memberData['party_id'] = PARTY_MAP[partyCode]
         else:
-            memberData['party_id'] = '?'
+            memberData['party_id'] = 'Code: "{}"'.format(partyCode)
             unreconciledParties.append(partyCode)
 
         electoralStatus = cleanup(row.cssselect('td')[5].text)
@@ -460,14 +460,14 @@ for x in range(0, PAGES):
                 if county in COUNTY_MAP:
                     memberData['district_id'] = COUNTY_MAP[county]
                 else:
-                    memberData['district_id'] = '?'
+                    memberData['district_id'] = 'County: "{}", Constituency: "{}"'.format(county, constituency)
                     unreconciledCounties.append(county)
                     print('      > Unreconciled county: ' + county)
             else:
                 if constituency in CONSTITUENCY_MAP:
                     memberData['district_id'] = CONSTITUENCY_MAP[constituency]
                 else:
-                    memberData['district_id'] = '?'
+                    memberData['district_id'] = 'County: "{}", Constituency: "{}"'.format(county, constituency)
                     unreconciledConstituencies.append(county)
                     print('      > Unreconciled constituency: {}'.format(constituency, county))
 
