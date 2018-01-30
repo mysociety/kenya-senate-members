@@ -8,7 +8,7 @@ import re
 BASE_URL = 'http://parliament.go.ke/the-senate/senators?start='
 
 HONORIFIC_MAP = {
-    'Sen.': 'Q2746176'
+    'Sen.': 'Q47515115'
 }
 
 PARTY_MAP = {
@@ -131,11 +131,11 @@ for x in range(0, PAGES):
 
         nameUnparsed = nameLink.text.strip()
 
-        nameRegex = re.search('(.+?) (.+)', nameUnparsed)
+        nameRegex = re.search('(.+?) (.+?) (.+)', nameUnparsed)
         memberData['honorific_string'] = nameRegex.group(1)
         memberData['honorific_id'] = HONORIFIC_MAP[nameRegex.group(1)]
 
-        memberData['name'] = cleanup(nameRegex.group(2))
+        memberData['name'] = cleanup(nameRegex.group(3) + ' ' + nameRegex.group(2))
 
         print('    ' + memberData['name'])
 
