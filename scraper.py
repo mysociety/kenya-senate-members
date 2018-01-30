@@ -163,15 +163,13 @@ for x in range(0, PAGES):
             # Nominees don't have these things, but are still members.
 
             county = cleanup(row.cssselect('td')[2].text)
-            constituency = cleanup(row.cssselect('td')[3].text)
 
             memberData['county'] = county
-            memberData['constituency'] = constituency
 
             if county in COUNTY_MAP:
                 memberData['district_id'] = COUNTY_MAP[county]
             else:
-                memberData['district_id'] = 'County: "{}", Constituency: "{}"'.format(county, constituency)
+                memberData['district_id'] = 'County: "{}"'.format(county)
                 unreconciledCounties.append(county)
                 print('      > Unreconciled county: ' + county)
 
